@@ -10,6 +10,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
+<script>
+window.showErr=function(m){var b=document.getElementById('errbar');if(!b){b=document.createElement('div');b.id='errbar';b.style.cssText='position:fixed;left:8px;right:8px;top:8px;z-index:99;background:#b91c1c;color:#fff;padding:10px 12px;border-radius:12px;font:12px/1.4 sans-serif;white-space:pre-wrap';(document.body||document.documentElement).appendChild(b)}b.textContent='Error: '+m};
+window.addEventListener('error',function(e){showErr((e.message||'error')+' (line '+(e.lineno||'?')+')')});
+window.addEventListener('unhandledrejection',function(e){showErr('Promise: '+((e.reason&&e.reason.message)||e.reason))});
+</script>
 <style>
 :root{--bg1:#08122b;--bg2:#171a44;--glass:rgba(255,255,255,.075);--glass-hi:rgba(255,255,255,.14);--stroke:rgba(255,255,255,.18);--field:rgba(255,255,255,.08);--ink:#f3f5ff;--mute:#aab3d6;--amber:#fbbf24;--amber2:#fb923c;--ok:#4ade80;--danger:#fb7185;--sheet:rgba(20,26,58,.78);--shadow:0 12px 32px rgba(0,0,0,.38);--blur:blur(14px) saturate(150%);--btnink:#1c1304;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
 body.light{--bg1:#e4eeff;--bg2:#fdeedd;--glass:rgba(255,255,255,.55);--glass-hi:rgba(255,255,255,.85);--stroke:rgba(255,255,255,.95);--field:rgba(255,255,255,.7);--ink:#141a36;--mute:#5a638c;--sheet:rgba(255,255,255,.82);--shadow:0 12px 32px rgba(70,80,140,.2)}
@@ -227,7 +232,7 @@ function code128(str){
 
 const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
-const BT=NATIVE?Capacitor.registerPlugin('BtPrinter'):null;
+const BT=NATIVE?(typeof Capacitor.registerPlugin==='function'?Capacitor.registerPlugin('BtPrinter'):(Capacitor.Plugins&&Capacitor.Plugins.BtPrinter)||new Proxy({},{get:(_,m)=>(o)=>Capacitor.nativePromise('BtPrinter',m,o||{})})):null;
 let _tt=0;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),3200)}
 const KEY='bilty_sticker_v1';
 const today=()=>new Date().toISOString().slice(0,10);
@@ -550,7 +555,7 @@ $('scanImg').onchange=async e=>{if(!('BarcodeDetector' in window)){$('scanOut').
     if(r.length)showScan(r[0].rawValue);else $('scanOut').innerHTML='<div class="warn">Barcode nahi mila.</div>'}catch(x){$('scanOut').innerHTML='<div class="warn">'+esc(x.message)+'</div>'}};
 
 if(!NATIVE&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
-load();applyUI();bindForm();renderItems();redraw();renderPrinters();initExtra();refreshDevs();
+[['load',load],['applyUI',applyUI],['bindForm',bindForm],['renderItems',renderItems],['sticker',doRedraw],['printers',renderPrinters],['initExtra',initExtra],['refreshDevs',refreshDevs]].forEach(function(s){try{var r=s[1]();if(r&&r.catch)r.catch(function(e){showErr(s[0]+': '+((e&&e.message)||e))})}catch(e){showErr(s[0]+': '+((e&&e.message)||e))}});
 
 </script>
 </body>
