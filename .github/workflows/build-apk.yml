@@ -1,0 +1,75 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Android SDK licenses (runner me SDK pehle se hai)
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+          echo "licenses done"
+
+      - name: Build (error ho to Summary me dikhega)
+        shell: bash
+        run: |
+          : > build.log
+          fail() {
+            msg=$(tail -n 40 build.log | tr -d '\r' | sed 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=$1 me error::${msg}"
+            echo "=========== POORA LOG ==========="
+            cat build.log
+            exit 1
+          }
+          ls -la >> build.log 2>&1
+          for f in index.html package.json capacitor.config.json patch_android.py BtPrinterPlugin.java MainActivity.java; do
+            [ -f "$f" ] || { echo "File kam hai: $f" >> build.log; fail "files check"; }
+          done
+          mkdir -p www
+          cp index.html www/
+          for f in manifest.webmanifest sw.js icon-192.png icon-512.png; do
+            [ -f "$f" ] && cp "$f" www/
+          done
+          echo ">> npm install" >> build.log
+          npm install >> build.log 2>&1 || fail "npm install"
+          echo ">> cap add android" >> build.log
+          npx cap add android >> build.log 2>&1 || fail "cap add android"
+          echo ">> patch" >> build.log
+          python3 patch_android.py >> build.log 2>&1 || fail "patch_android.py"
+          echo ">> cap sync" >> build.log
+          npx cap sync android >> build.log 2>&1 || fail "cap sync"
+          echo ">> gradle" >> build.log
+          (cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace) >> build.log 2>&1 || fail "gradle build"
+          cp android/app/build/outputs/apk/debug/app-debug.apk BiltySticker.apk
+          echo "APK ban gayi"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: BiltySticker-apk
+          path: BiltySticker.apk
+
+      - name: Release me daalo (seedha download link)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: Bilty Sticker APK ${{ github.run_number }}
+          files: BiltySticker.apk
