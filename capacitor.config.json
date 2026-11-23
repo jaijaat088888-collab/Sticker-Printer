@@ -1,0 +1,9 @@
+{
+  "appId": "com.biltysticker.app",
+  "appName": "Bilty Sticker",
+  "webDir": "www",
+  "backgroundColor": "#0a1226",
+  "android": {
+    "allowMixedContent": false
+  }
+}

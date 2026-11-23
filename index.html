@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bilty Sticker Printer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#08122b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{--bg1:#08122b;--bg2:#171a44;--glass:rgba(255,255,255,.075);--glass-hi:rgba(255,255,255,.14);--stroke:rgba(255,255,255,.18);--field:rgba(255,255,255,.08);--ink:#f3f5ff;--mute:#aab3d6;--amber:#fbbf24;--amber2:#fb923c;--ok:#4ade80;--danger:#fb7185;--sheet:rgba(20,26,58,.78);--shadow:0 12px 32px rgba(0,0,0,.38);--blur:blur(14px) saturate(150%);--btnink:#1c1304;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px)}
+body.light{--bg1:#e4eeff;--bg2:#fdeedd;--glass:rgba(255,255,255,.55);--glass-hi:rgba(255,255,255,.85);--stroke:rgba(255,255,255,.95);--field:rgba(255,255,255,.7);--ink:#141a36;--mute:#5a638c;--sheet:rgba(255,255,255,.82);--shadow:0 12px 32px rgba(70,80,140,.2)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;color:var(--ink);font:15px/1.4 "Segoe UI",Roboto,system-ui,-apple-system,sans-serif}
+body{background:linear-gradient(160deg,var(--bg1),var(--bg2));background-color:var(--bg1)}
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;transform:translateZ(0);
+ background:radial-gradient(60vmax 45vmax at -5% -5%,rgba(99,102,241,.6),transparent 62%),radial-gradient(50vmax 40vmax at 105% 15%,rgba(251,146,60,.38),transparent 60%),radial-gradient(60vmax 45vmax at 35% 112%,rgba(20,184,166,.4),transparent 62%)}
+body.light #bg{opacity:.55}
+.glass,.card{background:var(--glass);border:1px solid var(--stroke);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.2)}
+.card{border-radius:22px;padding:15px}
+.card h2{margin:0 0 10px;font-size:15px;font-weight:700;letter-spacing:.01em}
+header{position:sticky;top:8px;z-index:5;margin:8px 12px 0;border-radius:20px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{margin:0;font-size:18px;font-weight:800;letter-spacing:-.02em}
+#btst{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mute);background:var(--field);border:1px solid var(--stroke);border-radius:99px;padding:5px 11px;max-width:55%}
+#btst span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#btst i{flex:none;width:9px;height:9px;border-radius:50%;background:#8b93b5}
+#btst.on{color:var(--ink)}#btst.on i{background:var(--ok);animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.6);opacity:.55}}
+main{max-width:720px;margin:0 auto;padding:14px 12px 120px}
+.tab{display:none;flex-direction:column;gap:14px}
+.tab.on{display:flex;animation:tabin .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes tabin{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid .full{grid-column:1/-1}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--mute)}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--stroke);border-radius:13px;padding:10px 12px;width:100%;min-width:0;outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--amber);box-shadow:0 0 0 3px rgba(251,191,36,.22)}
+select option{color:#111}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--amber)}
+button{font:700 14px inherit;border:0;border-radius:14px;padding:12px 16px;cursor:pointer;background:var(--glass-hi);color:var(--ink);border:1px solid var(--stroke);transition:transform .15s cubic-bezier(.3,1.4,.5,1),filter .2s}
+button:active{transform:scale(.95)}
+button.p{background:linear-gradient(135deg,var(--amber),var(--amber2));color:var(--btnink);border:0;box-shadow:0 8px 22px rgba(251,146,60,.35)}
+button.d{background:rgba(251,113,133,.9);color:#fff;border:0}
+button:disabled{opacity:.5}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pv{display:flex;flex-direction:column;align-items:center;gap:10px}
+#cv{width:100%;max-width:520px;background:#fff;border-radius:8px;box-shadow:0 14px 34px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.4)}
+.mute{color:var(--mute);font-size:12px}.warn{color:var(--amber);font-size:12px}
+.it{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;align-items:center;padding:9px 0;border-top:1px solid var(--stroke)}
+.it:first-child{border-top:0}.it .nm{font-weight:700}
+.it .ctl{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--mute)}
+.it .ctl input,.it .ctl select{width:auto;padding:6px 8px}.it .ctl input[type=number]{width:70px}.it .ctl input[type=text]{width:120px}
+.mv{padding:4px 10px}
+.sv{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-top:1px solid var(--stroke)}
+.sv:first-child{border-top:0}
+nav{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));z-index:10;display:flex;border-radius:24px;padding:6px;max-width:520px;margin:0 auto}
+nav .ind{position:absolute;top:6px;bottom:6px;left:6px;width:calc((100% - 12px)/4);border-radius:18px;background:linear-gradient(135deg,rgba(251,191,36,.4),rgba(251,146,60,.3));border:1px solid rgba(251,191,36,.5);transition:transform .45s cubic-bezier(.3,1.25,.4,1)}
+nav button{position:relative;z-index:1;flex:1;background:none;border:0;color:var(--mute);padding:9px 2px;font-size:11.5px;box-shadow:none}
+nav button.on{color:var(--ink)}nav button span{display:block;font-size:20px;transition:transform .3s cubic-bezier(.3,1.5,.5,1)}nav button.on span{transform:translateY(-2px) scale(1.12)}
+#pm{position:fixed;inset:0;z-index:30;background:rgba(4,8,22,.55);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;display:flex;align-items:flex-end;justify-content:center}
+#pm.on{opacity:1;visibility:visible}
+.sheet{width:100%;max-width:560px;border-radius:28px 28px 0 0;padding:18px;display:flex;flex-direction:column;gap:12px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--sheet);border:1px solid var(--stroke);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);transform:translateY(60px);transition:transform .4s cubic-bezier(.2,.9,.3,1)}
+#pm.on .sheet{transform:none}
+.bar{height:9px;background:var(--field);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--amber2));border-radius:9px;transition:width .25s}
+#toast{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:40;max-width:86%;padding:11px 16px;border-radius:16px;font-size:13px;text-align:center;opacity:0;transform:translate(-50%,16px);transition:opacity .25s,transform .35s cubic-bezier(.2,.9,.3,1);pointer-events:none;background:var(--sheet);border:1px solid var(--stroke);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);box-shadow:var(--shadow)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+video{width:100%;border-radius:14px;background:#000;max-height:300px}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px;font-size:14px}.kv b{color:var(--mute);font-weight:500}
+pre{white-space:pre-wrap;font-size:12px;color:var(--mute);margin:0}
+#bkBox{display:none;margin-top:10px}#bkBox.on{display:block}
+.fl{padding:11px 16px;border:1px solid var(--stroke);border-radius:14px;font-weight:700;cursor:pointer;background:var(--glass-hi)}
+/* Smooth mode: no blur, no animation (purane / slow phones) */
+body.lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;animation:none!important;transition:none!important}
+body.lite .glass,body.lite .card{background:rgba(26,32,70,.94);box-shadow:none}
+body.light.lite .glass,body.light.lite .card{background:rgba(255,255,255,.92)}
+body.lite .sheet,body.lite #toast{background:rgba(22,28,62,.98)}
+body.light.lite .sheet,body.light.lite #toast{background:rgba(255,255,255,.98)}
+body.lite #bg{display:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<header class="glass"><h1>🏷️ Bilty Sticker</h1><div id="btst"><i></i><span>Printer nahi chuna</span></div></header>
+<main>
+
+<section class="tab on" id="t-create">
+  <div class="card pv">
+    <canvas id="cv"></canvas>
+    <div class="row"><button class="mv" id="pprev">◀</button><span>Box <input id="pbox" type="number" min="1" value="1" style="width:72px;display:inline-block"> / <b id="ptot">1</b></span><button class="mv" id="pnext">▶</button></div>
+    <div class="mute" id="pinfo"></div><div class="warn" id="pwarn"></div>
+  </div>
+
+  <div class="card"><h2>Sticker ki details</h2>
+    <div class="grid">
+      <label class="f full">Company / Transport ka naam (upar likha aayega)<input data-k="company" placeholder="Jaise: SHARMA TRANSPORT"></label>
+      <label class="f">Bilty No<input data-k="bilty" placeholder="12345"></label>
+      <label class="f">Total Boxes<input data-k="boxes" type="number" min="1" max="999" inputmode="numeric"></label>
+      <label class="f">Kahan se (From)<input data-k="from" placeholder="AMBALA"></label>
+      <label class="f">Kahan tak (To)<input data-k="to" placeholder="MUMBAI"></label>
+      <label class="f full">Party / Consignee<input data-k="party" placeholder="Receiver ka naam"></label>
+      <label class="f">Date<input data-k="date" type="date"></label>
+      <label class="f">Note / Maal<input data-k="note" placeholder="Jaise: Spare parts"></label>
+    </div>
+    <p class="mute" style="margin:10px 0 0">Jitne boxes likhoge utne stickers banenge: BOX 1/5 ... BOX 5/5. Har sticker ke barcode me bilty, route aur box number hote hain.</p>
+  </div>
+
+  <div class="card"><h2>Size aur layout</h2>
+    <div class="grid">
+      <label class="f">Sticker size<select id="preset"></select></label>
+      <label class="f">Printer DPI<select id="dpi"><option value="203">203 (normal)</option><option value="300">300</option></select></label>
+      <label class="f">Width (mm)<input id="wmm" type="number" min="20" max="200" step="1"></label>
+      <label class="f">Height (mm)<input id="hmm" type="number" min="15" max="300" step="1"></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="row"><input type="checkbox" id="border"> Border</label>
+      <label class="row"><input type="checkbox" id="upper"> CAPITAL letters</label>
+      <label class="row"><input type="checkbox" id="autofit"> Auto-fit</label>
+    </div>
+    <h2 style="margin-top:14px">Barcode</h2>
+    <div class="grid">
+      <label class="f">Barcode me kya ho<select id="barMode"><option value="full">Poori detail (bilty | from>to | box)</option><option value="short">Chhota (bilty | box)</option><option value="off">Barcode nahi</option></select></label>
+      <label class="f">Barcode ke neeche text<select id="human"><option value="1">Haan</option><option value="0">Nahi</option></select></label>
+    </div>
+    <h2 style="margin-top:14px">Sticker ke blocks (upar-neeche, size, bold)</h2>
+    <div id="items"></div>
+  </div>
+
+  <div class="row"><button id="save" style="flex:1">💾 Save</button><button class="p" id="print" style="flex:2">🖨️ Print</button></div>
+</section>
+
+<section class="tab" id="t-saved">
+  <div class="card"><h2>Saved stickers</h2><div id="list"></div>
+    <div class="row" style="margin-top:12px"><button id="exp">Backup bhejo / download</button>
+      <label class="fl" id="impLbl">Backup upload<input type="file" id="imp" accept=".json" hidden></label>
+      <button id="impBtn">Backup paste karo</button></div>
+    <div id="bkBox"><textarea id="bkText" rows="5" placeholder="Backup ka text yahan paste karo"></textarea><button class="p" id="bkGo" style="margin-top:8px">Restore karo</button></div>
+  </div>
+</section>
+
+<section class="tab" id="t-printer">
+  <div class="card" id="nat"><h2>Bluetooth printer</h2>
+    <div class="mute" style="margin-bottom:4px">Pair ho chuke printers</div>
+    <div id="nlist"></div>
+    <div class="row" style="margin-top:12px"><button class="p" id="nscan">🔍 Naye printer dhoondho</button><button id="nref">🔄 Refresh</button><button id="ntest">Test print</button></div>
+    <div id="nfoundBox" style="display:none;margin-top:12px"><div class="mute" id="nstat"></div><div id="nfound"></div></div>
+    <p class="mute" style="margin:12px 0 0">Printer on karke paas rakho. "Dhoondho" dabao, list me printer par <b>Pair</b> dabao (PIN poochhe to aksar 0000 ya 1234), phir <b>Connect</b>. Kuch na mile to phone ka Location (GPS) on karo, purane Android me ye zaroori hai.</p>
+    <button id="nset" style="margin-top:10px">⚙️ Phone ki Bluetooth settings</button>
+  </div>
+  <div class="card" id="web"><h2>Mere printers</h2>
+    <div id="plist"></div>
+    <div class="row" style="margin-top:10px"><button class="p" id="addp">➕ Naya printer jodo</button><button id="test">Test print</button></div>
+    <p class="mute" id="pnote" style="margin:8px 0 0"></p>
+    <label class="f" style="margin-top:10px">Writable channel (agar print na ho to dusra chuno)<select id="chr"></select></label>
+    <pre id="btlog"></pre>
+  </div>
+  <div class="card"><h2>Printer settings</h2>
+    <div class="grid">
+      <label class="f">Printer ki language<select id="proto"><option value="escpos">ESC/POS (58/80mm thermal printers)</option><option value="tspl">TSPL (label printers, jaise TSC/Xprinter/HPRT)</option></select></label>
+      <label class="f">Darkness (threshold)<input id="thr" type="number" min="60" max="220"></label>
+      <label class="f">Data chunk (sirf Chrome version)<select id="chunk"><option>20</option><option>100</option><option>180</option><option>512</option></select></label>
+      <label class="f">Delay (ms)<input id="delay" type="number" min="0" max="200"></label>
+      <label class="f">Feed lines (ESC/POS)<input id="feed" type="number" min="0" max="20"></label>
+      <label class="f">Label gap mm (TSPL)<input id="gap" type="number" min="0" max="10" step="0.5"></label>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <label class="row"><input type="checkbox" id="rot"> Sticker 90° ghumao</label>
+      <label class="row"><input type="checkbox" id="flip"> 180° ulta karo</label>
+      <label class="row"><input type="checkbox" id="inv"> Black/white ulta</label>
+      <label class="row"><input type="checkbox" id="ff"> Label ke baad Form-feed (ESC/POS)</label>
+    </div>
+  </div>
+  <div class="card"><h2>App ki setting</h2>
+    <div class="grid">
+      <label class="f">Theme<select id="theme"><option value="dark">Dark glass</option><option value="light">Light glass</option></select></label>
+      <label class="f">Smooth mode<span class="row" style="color:var(--ink);padding-top:9px"><input type="checkbox" id="lite"> Kam effects, tez chale</span></label>
+    </div>
+    <p class="mute" style="margin:10px 0 0">Phone atak raha ho to Smooth mode chalu karo, blur aur animation band ho jaate hain.</p>
+  </div>
+  <div class="card"><h2>Zaroori jaankari</h2>
+    <p class="mute" id="infoNat" style="margin:0">Ye app classic Bluetooth (SPP) printers se judti hai, jo phone me pair hote hain. Printer ka protocol ESC/POS ya TSPL hona chahiye. Pehle <b>Test print</b> karke dekho. Sticker ulta ya khali nikle to 180° ulta ya Black/white ulta tick karo.</p>
+    <p class="mute" id="infoWeb" style="margin:0">Web Bluetooth sirf <b>BLE</b> printers se jud sakta hai (Chrome Android/PC). Classic Bluetooth printers ke liye APK wali app use karo. Printer ka protocol ESC/POS ya TSPL hona chahiye.</p>
+  </div>
+</section>
+
+<section class="tab" id="t-scan">
+  <div class="card"><h2>Barcode scan karke details dekho</h2>
+    <video id="vid" playsinline muted style="display:none"></video>
+    <div class="row" style="margin-top:8px"><button class="p" id="scan">Camera se scan</button><button id="scanStop">Roko</button>
+      <label class="fl">Photo se<input type="file" id="scanImg" accept="image/*" hidden></label></div>
+    <div id="scanOut" style="margin-top:12px"></div>
+    <p class="mute">Koi bhi barcode scanner ya phone ka camera is sticker ko scan karega to text aayega: <b>BILTY|FROM&gt;TO|BOX/TOTAL</b></p>
+  </div>
+</section>
+</main>
+
+<nav class="glass">
+  <div class="ind"></div>
+  <button class="on" data-t="t-create"><span>✏️</span>Sticker</button>
+  <button data-t="t-saved"><span>📁</span>Saved</button>
+  <button data-t="t-printer"><span>🖨️</span>Printer</button>
+  <button data-t="t-scan"><span>📷</span>Scan</button>
+</nav>
+
+<div id="pm"><div class="sheet">
+  <b style="font-size:17px">Print karo</b>
+  <div class="grid"><label class="f full">Printer (isi se print nikalega)<select id="pdev"></select></label><label class="f">Box se<input id="pfrom" type="number" min="1"></label><label class="f">Box tak<input id="pto" type="number" min="1"></label>
+  <label class="f full">Har sticker ki copies<input id="pcopy" type="number" min="1" max="20" value="1"></label></div>
+  <div class="mute" id="pcount"></div>
+  <div class="bar"><i id="pbar"></i></div><div class="mute" id="pstat"></div>
+  <div class="row"><button class="p" id="goBt" style="flex:1">Bluetooth print</button><button id="goSys" style="flex:1">System print / PDF</button></div>
+  <div class="row"><button id="goPng" style="flex:1">PNG download</button><button id="pclose" style="flex:1">Band karo</button></div>
+</div></div>
+<div id="toast"></div>
+<script>
+
+const PAT=["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232","2331112"];
+function code128(str){
+  const s=[...str].map(ch=>{const c=ch.charCodeAt(0);return c>=32&&c<=126?c:63});
+  const codes=[104];let sum=104;
+  s.forEach((c,i)=>{codes.push(c-32);sum+=(c-32)*(i+1)});
+  codes.push(sum%103);codes.push(106);
+  return codes.map(c=>PAT[c]).join('').split('').map(Number)}
+
+const $=id=>document.getElementById(id),sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const BT=NATIVE?Capacitor.registerPlugin('BtPrinter'):null;
+let _tt=0;function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('on'),3200)}
+const KEY='bilty_sticker_v1';
+const today=()=>new Date().toISOString().slice(0,10);
+const defItems=()=>[
+ {k:'company',n:'Company / Transport',show:true,size:4,bold:true,align:'c',pre:''},
+ {k:'bilty',n:'Bilty No',show:true,size:8,bold:true,align:'l',pre:'BILTY NO: '},
+ {k:'route',n:'From \u2192 To',show:true,size:7,bold:true,align:'l',pre:''},
+ {k:'boxes',n:'Box count',show:true,size:11,bold:true,align:'c',pre:'BOX'},
+ {k:'party',n:'Party / Consignee',show:true,size:4,bold:false,align:'l',pre:'PARTY: '},
+ {k:'note',n:'Note / Maal',show:true,size:3.5,bold:false,align:'l',pre:''},
+ {k:'date',n:'Date',show:true,size:3.2,bold:false,align:'l',pre:'DATE: '},
+ {k:'barcode',n:'Barcode (height mm)',show:true,size:14,bold:false,align:'c',pre:''}];
+const def=()=>({data:{company:'',bilty:'',from:'',to:'',boxes:1,party:'',note:'',date:today()},
+ layout:{wmm:100,hmm:75,dpi:203,border:true,upper:true,autofit:true,human:true,barMode:'full',items:defItems()},
+ printer:{proto:'escpos',chunk:100,delay:15,feed:2,gap:2,thr:150,rot:false,flip:false,inv:false,ff:false},saved:[],printers:[],sel:'',ui:{theme:'dark',lite:null}});
+let S=def();
+function load(){try{const j=JSON.parse(localStorage.getItem(KEY)||'null');if(j){const d=def();S={data:{...d.data,...j.data},layout:{...d.layout,...j.layout},printer:{...d.printer,...j.printer},saved:j.saved||[],printers:j.printers||[],sel:j.sel||'',ui:{...d.ui,...(j.ui||{})}};
+  if(!S.layout.items||S.layout.items.length!==8)S.layout.items=defItems()}}catch(e){}}
+let st=0;function persist(){clearTimeout(st);st=setTimeout(()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}},250)}
+
+/* ---------- sticker drawing ---------- */
+function clean(s){return String(s||'').toUpperCase().replace(/[^\x20-\x7E]/g,'?')}
+function barStr(box){const D=S.data,m=S.layout.barMode;
+  if(m==='short')return clean(D.bilty)+'|'+box+'/'+D.boxes;
+  return clean(D.bilty)+'|'+clean(D.from)+'>'+clean(D.to)+'|'+box+'/'+D.boxes}
+function textFor(it,box){const D=S.data,U=S.layout.upper?(s=>String(s).toUpperCase()):(s=>String(s));let t='';
+  switch(it.k){
+   case 'company':t=D.company;break;
+   case 'bilty':t=D.bilty?it.pre+D.bilty:'';break;
+   case 'route':t=D.from&&D.to?D.from+' \u2192 '+D.to:(D.from||D.to||'');break;
+   case 'boxes':t=(it.pre?it.pre+' ':'')+box+' / '+D.boxes;break;
+   case 'party':t=D.party?it.pre+D.party:'';break;
+   case 'note':t=D.note;break;
+   case 'date':t=D.date?it.pre+D.date.split('-').reverse().join('-'):'';break}
+  return t?U(t):''}
+function drawSticker(cv,box){
+  const L=S.layout,dpmm=L.dpi/25.4,W=Math.round(L.wmm*dpmm),H=Math.round(L.hmm*dpmm);
+  cv.width=W;cv.height=H;
+  const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,W,H);c.fillStyle='#000';c.strokeStyle='#000';c.textBaseline='top';
+  const pad=Math.round(2.2*dpmm),info={warn:[],mod:0};
+  if(L.border){const lw=Math.max(2,Math.round(.3*dpmm));c.lineWidth=lw;c.strokeRect(lw/2+1,lw/2+1,W-lw-2,H-lw-2)}
+  const bl=[];
+  for(const it of L.items){if(!it.show)continue;
+    if(it.k==='barcode'){if(L.barMode!=='off')bl.push({it,bar:true});continue}
+    const t=textFor(it,box);if(t)bl.push({it,t})}
+  const hum=L.human?2.6*dpmm:0;
+  const lh=b=>b.bar?b.it.size*dpmm+(hum?hum*1.25:0):b.it.size*1.15*dpmm;
+  const gap0=.6*dpmm,avail=H-2*pad;
+  let tot=bl.reduce((a,b)=>a+lh(b),0)+gap0*Math.max(0,bl.length-1),f=1;
+  if(L.autofit&&tot>avail)f=avail/tot;
+  else if(tot>avail)info.warn.push('Content sticker se bada hai, size kam karo ya Auto-fit chalu karo.');
+  const used=tot*f,extra=Math.max(0,avail-used),gap=gap0*f+(bl.length>1?Math.min(extra/(bl.length+1),2.5*dpmm):0);
+  const used2=bl.reduce((a,b)=>a+lh(b)*f,0)+gap*Math.max(0,bl.length-1);
+  let y=pad+Math.max(0,(avail-used2)/2);const maxW=W-2*pad;
+  for(const b of bl){const h=lh(b)*f;
+    if(b.bar){
+      const s=barStr(box),bits=code128(s),mods=bits.reduce((a,v)=>a+v,0),quiet=10;
+      let m=Math.floor(maxW/(mods+2*quiet));
+      if(m<1){m=1;info.warn.push('Barcode is size me bahut lamba hai. "Chhota" barcode ya bada sticker use karo.')}
+      else if(m<2)info.warn.push('Barcode bahut patla hai (1 dot). Scan mushkil ho sakta hai, "Chhota" mode ya bada sticker lo.');
+      info.mod=m;
+      const bw=mods*m,bh=Math.round(b.it.size*dpmm*f);let x=Math.round((W-bw)/2),bar=true;
+      for(const u of bits){if(bar)c.fillRect(x,Math.round(y),u*m,bh);x+=u*m;bar=!bar}
+      if(hum){let px=hum*f;c.font=px+'px Arial,Helvetica,sans-serif';let w=c.measureText(s).width;if(w>maxW){px*=maxW/w;c.font=px+'px Arial,Helvetica,sans-serif';w=maxW}
+        c.fillText(s,(W-w)/2,y+bh+hum*.15*f)}
+    }else{
+      let px=Math.max(6,b.it.size*dpmm*f);const fo=p=>(b.it.bold?'bold ':'')+p+'px Arial,Helvetica,sans-serif';
+      c.font=fo(px);let w=c.measureText(b.t).width;if(w>maxW){px*=maxW/w;c.font=fo(px);w=maxW}
+      const x=b.it.align==='c'?(W-w)/2:b.it.align==='r'?W-pad-w:pad;
+      c.fillText(b.t,x,y+(h-px)/2)}
+    y+=h+gap}
+  info.W=W;info.H=H;return info}
+function getJobCanvas(box){
+  const cv=document.createElement('canvas');drawSticker(cv,box);let out=cv;const P=S.printer;
+  const rot=(src,deg)=>{const o=document.createElement('canvas'),w=src.width,h=src.height;
+    if(deg===180){o.width=w;o.height=h}else{o.width=h;o.height=w}
+    const x=o.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,o.width,o.height);x.translate(o.width/2,o.height/2);x.rotate(deg*Math.PI/180);x.drawImage(src,-w/2,-h/2);return o};
+  if(P.rot)out=rot(out,90);if(P.flip)out=rot(out,180);return out}
+
+/* ---------- ESC/POS + TSPL ---------- */
+function bitmap(cv,thr,invertBits){
+  const w8=Math.ceil(cv.width/8)*8,h=cv.height,wb=w8/8,x=cv.getContext('2d').getImageData(0,0,cv.width,h).data,out=new Uint8Array(wb*h);
+  for(let y=0;y<h;y++)for(let xx=0;xx<w8;xx++){let black=0;if(xx<cv.width){const i=(y*cv.width+xx)*4;black=(x[i]*.299+x[i+1]*.587+x[i+2]*.114)<thr?1:0}
+    const bit=invertBits?1-black:black;if(bit)out[y*wb+(xx>>3)]|=0x80>>(xx&7)}
+  return {data:out,wb,h,w8}}
+function jobBytes(cv){const P=S.printer;const bytes=[];
+  if(P.proto==='escpos'){
+    const b=bitmap(cv,P.thr,P.inv);bytes.push(0x1B,0x40);
+    for(let y0=0;y0<b.h;y0+=128){const rows=Math.min(128,b.h-y0);
+      bytes.push(0x1D,0x76,0x30,0x00,b.wb&255,b.wb>>8,rows&255,rows>>8);
+      const part=b.data.subarray(y0*b.wb,(y0+rows)*b.wb);for(let i=0;i<part.length;i++)bytes.push(part[i])}
+    if(P.ff)bytes.push(0x0C);else bytes.push(0x1B,0x64,P.feed&255);
+    return Uint8Array.from(bytes)}
+  const b=bitmap(cv,P.thr,!P.inv); // TSPL: 0 = black
+  const mm=(v)=>(v/(S.layout.dpi/25.4)).toFixed(1);
+  const head=new TextEncoder().encode('SIZE '+mm(cv.width)+' mm,'+mm(cv.height)+' mm\r\nGAP '+P.gap+' mm,0 mm\r\nCLS\r\nBITMAP 0,0,'+b.wb+','+b.h+',0,');
+  const tail=new TextEncoder().encode('\r\nPRINT 1,1\r\n');
+  const out=new Uint8Array(head.length+b.data.length+tail.length);out.set(head,0);out.set(b.data,head.length);out.set(tail,head.length+b.data.length);return out}
+
+/* ---------- Bluetooth ---------- */
+const SVC=['0000ffe0-0000-1000-8000-00805f9b34fb','0000ff00-0000-1000-8000-00805f9b34fb','000018f0-0000-1000-8000-00805f9b34fb','0000ffe5-0000-1000-8000-00805f9b34fb','0000fff0-0000-1000-8000-00805f9b34fb','0000fee7-0000-1000-8000-00805f9b34fb','0000ae30-0000-1000-8000-00805f9b34fb','49535343-fe7d-4ae5-8fa9-9fafd205e455','e7810a71-73ae-499d-8c15-faa9aef0c3f2','38eb4a80-c570-11e3-9507-0002a5d5c51b','0000ff12-0000-1000-8000-00805f9b34fb'];
+let dev=null,chars=[];const devMap=new Map();
+const selP=()=>S.printers.find(p=>p.id===S.sel);
+function btUI(on){const p=NATIVE?(S.sel?{name:nName(S.sel)}:null):selP();$('btst').className=on?'on':'';$('btst').lastChild.textContent=p?p.name+(on?' (juda)':' (nahi juda)'):'Printer nahi chuna'}
+function selectDev(){if(dev&&dev.id!==S.sel){try{dev.gatt.disconnect()}catch(e){}dev=null;chars=[];$('chr').innerHTML=''}}
+function renderPrinters(){NATIVE?renderNative():renderWeb()}
+function renderWeb(){
+  const box=$('plist');
+  if(!S.printers.length)box.innerHTML='<div class="mute">Abhi koi printer nahi juda. "Naya printer jodo" dabao.</div>';
+  else{box.innerHTML='';S.printers.forEach(p=>{const d=devMap.get(p.id),on=d&&d.gatt&&d.gatt.connected;
+    const r=document.createElement('div');r.className='sv';
+    r.innerHTML='<label class="row" style="flex:1;cursor:pointer"><input type="radio" name="pr"'+(S.sel===p.id?' checked':'')+'><div><b>'+esc(p.name)+'</b><div class="mute">'+(on?'Juda hai \u2705':d?'Taiyar (print par judega)':'Dobara jodna padega')+'</div></div></label><button class="d" data-a="del">Hatao</button>';
+    r.querySelector('input').onchange=()=>{S.sel=p.id;persist();selectDev();renderPrinters()};
+    r.querySelector('[data-a=del]').onclick=async()=>{if(!confirm(p.name+' hatayein?'))return;
+      const d2=devMap.get(p.id);try{if(d2){d2.gatt.disconnect();if(d2.forget)await d2.forget()}}catch(e){}
+      devMap.delete(p.id);S.printers=S.printers.filter(x=>x.id!==p.id);
+      if(S.sel===p.id){S.sel=S.printers[0]?S.printers[0].id:'';dev=null;chars=[]}persist();renderPrinters()};
+    box.appendChild(r)})}
+  $('pdev').innerHTML=S.printers.map(p=>'<option value="'+p.id+'"'+(S.sel===p.id?' selected':'')+'>'+esc(p.name)+'</option>').join('')||'<option value="">Koi printer nahi</option>';
+  btUI(!!(dev&&dev.id===S.sel&&dev.gatt.connected));
+  $('pnote').textContent=(navigator.bluetooth&&navigator.bluetooth.getDevices)?'Ek baar jodne ke baad printer is list me rahega, har baar Chrome ka popup nahi aayega. Print sirf jo printer chuna hai usi se nikalega.':'Is Chrome version me saved printers ki list nahi chalti, isliye har baar printer dobara chunna padega.'}
+async function refreshDevs(){if(NATIVE)return nRefresh();
+  if(navigator.bluetooth&&navigator.bluetooth.getDevices){try{for(const d of await navigator.bluetooth.getDevices()){devMap.set(d.id,d);
+    if(!S.printers.find(p=>p.id===d.id))S.printers.push({id:d.id,name:d.name||'Printer'})}persist()}catch(e){}}
+  renderPrinters()}
+async function addPrinter(){
+  if(!navigator.bluetooth){toast('Is browser me Web Bluetooth nahi hai. Android/PC Chrome use karo, ya System print / PDF use karo.');return false}
+  try{$('btlog').textContent='Device dhoondh raha hai...';
+    const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:SVC});
+    devMap.set(d.id,d);if(!S.printers.find(p=>p.id===d.id))S.printers.push({id:d.id,name:d.name||'Printer'});
+    S.sel=d.id;persist();selectDev();renderPrinters();return await openGatt()}
+  catch(e){$('btlog').textContent='Error: '+e.message;return false}}
+async function openGatt(){
+  const d=devMap.get(S.sel);if(!d)throw new Error('Printer chuna nahi gaya');
+  dev=d;if(!d._ls){d._ls=1;d.addEventListener('gattserverdisconnected',()=>{chars=[];renderPrinters()})}
+  const srv=await d.gatt.connect(),svcs=await srv.getPrimaryServices();chars=[];let log='Juda: '+(d.name||'device')+'\n';
+  for(const s of svcs){const cs=await s.getCharacteristics();
+    for(const c of cs){const p=c.properties;log+=s.uuid.slice(4,8)+' / '+c.uuid.slice(4,8)+(p.write?' W':'')+(p.writeWithoutResponse?' WNR':'')+'\n';
+      if(p.write||p.writeWithoutResponse)chars.push({c,label:s.uuid.slice(4,8)+' / '+c.uuid.slice(4,8)})}}
+  $('chr').innerHTML=chars.map((x,i)=>'<option value="'+i+'">'+x.label+'</option>').join('');
+  $('btlog').textContent=log+(chars.length?'':'\nKoi writable channel nahi mila. Ye printer shayad classic Bluetooth wala hai.');
+  renderPrinters();return chars.length>0}
+async function ensureBT(){if(NATIVE)return ensureNative();
+  const p=selP();if(!p||!devMap.get(p.id))return await addPrinter();
+  if(dev&&dev.id===p.id&&dev.gatt.connected&&chars.length)return true;
+  try{return await openGatt()}catch(e){$('pstat').textContent='Printer se nahi juda: '+e.message+'. Printer on karke paas lao.';$('btlog').textContent='Error: '+e.message;return false}}
+async function sendBytes(u8,onp){
+  if(NATIVE){const n=4096,dl=+S.printer.delay;for(let i=0;i<u8.length;i+=n){await BT.write({data:b64(u8.subarray(i,i+n))});if(onp&&(i/n)%4===0)onp(i/u8.length);if(dl)await sleep(dl)}return}
+  const ch=chars[+$('chr').value||0].c,n=+S.printer.chunk,d=+S.printer.delay,nr=ch.properties.writeWithoutResponse;
+  for(let i=0;i<u8.length;i+=n){const part=u8.slice(i,i+n);
+    if(nr)await ch.writeValueWithoutResponse(part);else await ch.writeValue(part);
+    if(d)await sleep(d);if(onp&&(i/n)%20===0)onp(i/u8.length)}}
+
+/* ---------- Native Bluetooth (APK) ---------- */
+let nList=[],nConn='';
+const nName=a=>{const d=nList.find(x=>x.address===a);return d?d.name:a};
+function b64(u){let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)}
+async function nRefresh(){try{const r=await BT.list();nList=r.devices||[];if(!S.sel&&nList.length===1){S.sel=nList[0].address;persist()}}catch(e){toast(e.message||String(e))}renderPrinters()}
+function renderNative(){
+  const box=$('nlist');box.innerHTML='';
+  if(!nList.length)box.innerHTML='<div class="mute">Abhi koi pair kiya hua printer nahi. "Naye printer dhoondho" dabao.</div>';
+  nList.forEach(d=>{const on=nConn===d.address,r=document.createElement('div');r.className='sv';
+    r.innerHTML='<label class="row" style="flex:1;cursor:pointer"><input type="radio" name="npr"'+(S.sel===d.address?' checked':'')+'><div><b>'+esc(d.name)+'</b><div class="mute">'+esc(d.address)+(on?' \u2022 Juda hai \u2705':'')+'</div></div></label><button class="'+(on?'':'p')+'" data-a="cn">'+(on?'Disconnect':'Connect')+'</button>';
+    r.querySelector('input').onchange=()=>selectNative(d.address);
+    r.querySelector('[data-a=cn]').onclick=async e=>{const bt=e.currentTarget;bt.disabled=true;
+      if(on){try{await BT.disconnect()}catch(x){}nConn='';renderPrinters();return}
+      await selectNative(d.address);bt.textContent='Judh raha hai...';if(await ensureNative())toast(d.name+' se juda');renderPrinters()};
+    box.appendChild(r)});
+  $('pdev').innerHTML='<option value="">-- printer chuno --</option>'+nList.map(d=>'<option value="'+d.address+'"'+(S.sel===d.address?' selected':'')+'>'+esc(d.name)+'</option>').join('');
+  btUI(!!S.sel&&nConn===S.sel)}
+let nFound=[];
+async function nScan(){const bt=$('nscan');bt.disabled=true;bt.textContent='Dhoondh raha hai...';$('nfoundBox').style.display='';$('nstat').textContent='Printer on hai? 12-15 second ruko...';$('nfound').innerHTML='';
+  try{const r=await BT.scan();nFound=r.devices||[]}catch(e){toast(e.message||String(e));nFound=[]}
+  bt.disabled=false;bt.textContent='🔍 Naye printer dhoondho';renderFound()}
+function renderFound(){const box=$('nfound');box.innerHTML='';const list=nFound.filter(d=>!nList.find(x=>x.address===d.address));
+  $('nstat').textContent=list.length?'Mile hue devices (pair karne ke liye Pair dabao):':'Koi naya device nahi mila. Printer on hai? Location (GPS) on karke dobara dhoondho.';
+  list.forEach(d=>{const r=document.createElement('div');r.className='sv';
+    r.innerHTML='<div><b>'+esc(d.name)+'</b><div class="mute">'+esc(d.address)+'</div></div><button class="p">Pair</button>';
+    r.querySelector('button').onclick=async e=>{const bt=e.currentTarget;bt.disabled=true;bt.textContent='Pair ho raha hai...';toast('Phone par pair ya PIN ka box aaye to Allow karo / PIN daalo');
+      try{await BT.pair({address:d.address});toast(d.name+' pair ho gaya \u2705');nFound=nFound.filter(x=>x.address!==d.address);await nRefresh();await selectNative(d.address);renderFound()}
+      catch(x){toast(x.message||'Pair nahi hua');bt.disabled=false;bt.textContent='Pair'}};
+    box.appendChild(r)})}
+async function selectNative(a){if(nConn&&nConn!==a){try{await BT.disconnect()}catch(e){}nConn=''}S.sel=a;persist();renderPrinters()}
+async function ensureNative(){
+  if(!S.sel){toast('Pehle printer chuno');$('pstat').textContent='Pehle printer chuno';return false}
+  if(nConn===S.sel)return true;
+  try{$('pstat').textContent='Printer se judh raha hai...';await BT.connect({address:S.sel});nConn=S.sel;renderPrinters();return true}
+  catch(e){const em='Nahi juda: '+(e.message||e)+'. Printer on karke paas lao.';$('pstat').textContent=em;toast(em);return false}}
+function applyUI(){const u=S.ui;if(u.lite===null||u.lite===undefined)u.lite=!!(navigator.deviceMemory&&navigator.deviceMemory<=3);
+  document.body.classList.toggle('light',u.theme==='light');document.body.classList.toggle('lite',!!u.lite);
+  const m=document.querySelector('meta[name=theme-color]');if(m)m.content=u.theme==='light'?'#e6efff':'#08122b'}
+function ind(){const k=[...document.querySelectorAll('nav button')].findIndex(b=>b.classList.contains('on'));document.querySelector('nav .ind').style.transform='translateX('+(Math.max(0,k)*100)+'%)'}
+function initExtra(){
+  $('nat').style.display=NATIVE?'':'none';$('web').style.display=NATIVE?'none':'';
+  $('infoNat').style.display=NATIVE?'':'none';$('infoWeb').style.display=NATIVE?'none':'';
+  if(NATIVE){$('goSys').style.display='none';$('goPng').style.display='none';$('impLbl').style.display='none'}else $('impBtn').style.display='none';
+  $('nref').onclick=nRefresh;$('nscan').onclick=nScan;$('nset').onclick=()=>BT.openSettings().catch(e=>toast(e.message||'Settings nahi khuli'));$('ntest').onclick=()=>runBT([1]);
+  $('theme').value=S.ui.theme;$('lite').checked=!!S.ui.lite;
+  $('theme').onchange=()=>{S.ui.theme=$('theme').value;applyUI();persist()};
+  $('lite').onchange=()=>{S.ui.lite=$('lite').checked;applyUI();persist()};
+  $('impBtn').onclick=()=>$('bkBox').classList.toggle('on');
+  $('bkGo').onclick=()=>{try{const j=JSON.parse($('bkText').value);if(!Array.isArray(j))throw 0;S.saved=j.concat(S.saved);persist();renderSaved();$('bkText').value='';$('bkBox').classList.remove('on');toast('Backup wapas aa gaya')}catch(e){toast('Backup text sahi nahi hai')}};
+  ind()}
+/* ---------- UI ---------- */
+const PRESETS=[['50\u00d730',50,30],['60\u00d740',60,40],['75\u00d750',75,50],['100\u00d750',100,50],['100\u00d775',100,75],['100\u00d7100',100,100],['100\u00d7150',100,150],['Custom',0,0]];
+function bindForm(){
+  document.querySelectorAll('[data-k]').forEach(el=>{el.value=S.data[el.dataset.k];
+    el.oninput=()=>{let v=el.value;if(el.dataset.k==='boxes'){v=Math.max(1,Math.min(999,parseInt(v)||1))}S.data[el.dataset.k]=v;if(el.dataset.k==='boxes'){$('pbox').max=v;if(+$('pbox').value>v)$('pbox').value=v}redraw();persist()}});
+  $('preset').innerHTML=PRESETS.map((p,i)=>'<option value="'+i+'">'+p[0]+' mm</option>').join('');
+  const L=S.layout;
+  $('wmm').value=L.wmm;$('hmm').value=L.hmm;$('dpi').value=L.dpi;$('border').checked=L.border;$('upper').checked=L.upper;$('autofit').checked=L.autofit;$('barMode').value=L.barMode;$('human').value=L.human?'1':'0';
+  syncPreset();
+  $('preset').onchange=()=>{const p=PRESETS[+$('preset').value];if(p[1]){L.wmm=p[1];L.hmm=p[2];$('wmm').value=p[1];$('hmm').value=p[2]}redraw();persist()};
+  $('wmm').oninput=()=>{L.wmm=Math.max(20,+$('wmm').value||100);syncPreset();redraw();persist()};
+  $('hmm').oninput=()=>{L.hmm=Math.max(15,+$('hmm').value||75);syncPreset();redraw();persist()};
+  $('dpi').onchange=()=>{L.dpi=+$('dpi').value;redraw();persist()};
+  $('border').onchange=()=>{L.border=$('border').checked;redraw();persist()};
+  $('upper').onchange=()=>{L.upper=$('upper').checked;redraw();persist()};
+  $('autofit').onchange=()=>{L.autofit=$('autofit').checked;redraw();persist()};
+  $('barMode').onchange=()=>{L.barMode=$('barMode').value;redraw();persist()};
+  $('human').onchange=()=>{L.human=$('human').value==='1';redraw();persist()};
+  const P=S.printer;
+  $('proto').value=P.proto;$('thr').value=P.thr;$('chunk').value=P.chunk;$('delay').value=P.delay;$('feed').value=P.feed;$('gap').value=P.gap;
+  $('rot').checked=P.rot;$('flip').checked=P.flip;$('inv').checked=P.inv;$('ff').checked=P.ff;
+  [['proto','proto'],['thr','thr'],['chunk','chunk'],['delay','delay'],['feed','feed'],['gap','gap']].forEach(([id,k])=>$(id).onchange=()=>{P[k]=id==='proto'?$(id).value:+$(id).value;persist()});
+  [['rot','rot'],['flip','flip'],['inv','inv'],['ff','ff']].forEach(([id,k])=>$(id).onchange=()=>{P[k]=$(id).checked;persist()});
+  $('pbox').max=S.data.boxes;
+}
+function syncPreset(){const L=S.layout,i=PRESETS.findIndex(p=>p[1]===L.wmm&&p[2]===L.hmm);$('preset').value=i<0?PRESETS.length-1:i}
+function renderItems(){
+  const L=S.layout,box=$('items');box.innerHTML='';
+  L.items.forEach((it,i)=>{const d=document.createElement('div');d.className='it';
+    const hasPre=['bilty','boxes','party','date'].includes(it.k),isBar=it.k==='barcode';
+    d.innerHTML='<label class="row"><input type="checkbox" '+(it.show?'checked':'')+' data-a="show"></label><span class="nm">'+it.n+'</span><span class="row"><button class="mv" data-a="up">\u2191</button><button class="mv" data-a="dn">\u2193</button></span>'
+     +'<div class="ctl"><span>'+(isBar?'Height':'Size')+' mm</span><input type="number" step="0.5" min="1" max="60" value="'+it.size+'" data-a="size">'
+     +(isBar?'':'<label class="row"><input type="checkbox" '+(it.bold?'checked':'')+' data-a="bold">Bold</label><select data-a="align"><option value="l">Left</option><option value="c">Center</option><option value="r">Right</option></select>')
+     +(hasPre?'<span>Likha:</span><input type="text" value="'+it.pre.replace(/"/g,'&quot;')+'" data-a="pre">':'')+'</div>';
+    const al=d.querySelector('[data-a=align]');if(al)al.value=it.align;
+    d.oninput=d.onchange=e=>{const a=e.target.dataset.a;if(!a||a==='up'||a==='dn')return;
+      it[a]=a==='show'||a==='bold'?e.target.checked:a==='size'?(+e.target.value||1):e.target.value;redraw();persist()};
+    d.onclick=e=>{const a=e.target.dataset.a;if(a!=='up'&&a!=='dn')return;const j=a==='up'?i-1:i+1;if(j<0||j>=L.items.length)return;[L.items[i],L.items[j]]=[L.items[j],L.items[i]];renderItems();redraw();persist()};
+    box.appendChild(d)})}
+let pvBox=1;
+function doRedraw(){
+  const n=S.data.boxes;$('ptot').textContent=n;pvBox=Math.max(1,Math.min(n,pvBox));$('pbox').value=pvBox;
+  const info=drawSticker($('cv'),pvBox);
+  $('pinfo').textContent=S.layout.wmm+' \u00d7 '+S.layout.hmm+' mm  \u2022  '+info.W+' \u00d7 '+info.H+' dots'+(info.mod?'  \u2022  barcode line '+info.mod+' dot ('+(info.mod/(S.layout.dpi/25.4)).toFixed(2)+' mm)':'');
+  $('pwarn').textContent=[...new Set(info.warn)].join(' ')}
+let _rq=0;function redraw(){if(_rq)return;_rq=requestAnimationFrame(()=>{_rq=0;doRedraw()})}
+$('pprev').onclick=()=>{pvBox--;redraw()};$('pnext').onclick=()=>{pvBox++;redraw()};
+$('pbox').oninput=()=>{pvBox=parseInt($('pbox').value)||1;redraw()};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t));
+  if(b.dataset.t==='t-saved')renderSaved();if(b.dataset.t==='t-printer')refreshDevs();if(b.dataset.t!=='t-scan')stopScan();ind()});
+
+/* ---------- save / load ---------- */
+$('save').onclick=()=>{const D=S.data;if(!D.bilty){toast('Pehle Bilty No daalo');return}
+  const name=D.bilty+' \u2022 '+(D.from||'?')+'\u2192'+(D.to||'?')+' \u2022 '+D.boxes+' box';
+  const rec={id:Date.now(),name,data:{...D},layout:JSON.parse(JSON.stringify(S.layout))};
+  const i=S.saved.findIndex(s=>s.data.bilty===D.bilty);if(i>=0)S.saved[i]=rec;else S.saved.unshift(rec);
+  persist();toast('Save ho gaya: '+name)};
+function renderSaved(){const el=$('list');
+  if(!S.saved.length){el.innerHTML='<div class="mute">Abhi kuch save nahi hai.</div>';return}
+  el.innerHTML='';S.saved.forEach(s=>{const d=document.createElement('div');d.className='sv';
+    d.innerHTML='<div><b>'+esc(s.data.bilty)+'</b><div class="mute">'+esc(s.data.from)+' \u2192 '+esc(s.data.to)+' \u2022 '+s.data.boxes+' box'+(s.data.party?' \u2022 '+esc(s.data.party):'')+'</div></div><div class="row"><button class="s" data-a="open">Kholo</button><button class="p" data-a="prt">Print</button><button class="d" data-a="del">\u2715</button></div>';
+    d.onclick=e=>{const a=e.target.dataset.a;if(!a)return;
+      if(a==='del'){if(confirm('Delete karein?')){S.saved=S.saved.filter(x=>x.id!==s.id);persist();renderSaved()}return}
+      S.data={...S.data,...s.data};S.layout={...S.layout,...JSON.parse(JSON.stringify(s.layout))};pvBox=1;bindForm();renderItems();redraw();persist();
+      document.querySelector('nav button[data-t=t-create]').click();if(a==='prt')openPrint()};
+    el.appendChild(d)})}
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+$('exp').onclick=async()=>{const txt=JSON.stringify(S.saved);if(NATIVE){try{await BT.shareText({text:txt})}catch(e){toast('Share nahi hua')}return}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download='stickers-backup.json';a.click()};
+$('imp').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(Array.isArray(j)){S.saved=j.concat(S.saved);persist();renderSaved()}}catch(x){toast('File sahi nahi hai')}};
+
+/* ---------- print ---------- */
+function openPrint(){renderPrinters();$('pfrom').value=1;$('pto').value=S.data.boxes;$('pbar').style.width='0';$('pstat').textContent='';updCount();$('pm').classList.add('on')}
+function range(){const n=S.data.boxes,a=Math.max(1,Math.min(n,parseInt($('pfrom').value)||1)),b=Math.max(a,Math.min(n,parseInt($('pto').value)||n)),c=Math.max(1,parseInt($('pcopy').value)||1);return {a,b,c}}
+function updCount(){const r=range();$('pcount').textContent='Total stickers: '+(r.b-r.a+1)*r.c+'  (Bilty '+S.data.bilty+', box '+r.a+' se '+r.b+' tak)'}
+['pfrom','pto','pcopy'].forEach(id=>$(id).oninput=updCount);
+$('print').onclick=openPrint;$('pclose').onclick=()=>$('pm').classList.remove('on');
+async function runBT(boxes){
+  if(!(await ensureBT()))return;
+  const jobs=[];for(const b of boxes)jobs.push([b,jobBytes(getJobCanvas(b))]);
+  try{for(let i=0;i<jobs.length;i++){
+      $('pstat').textContent='Print ho raha hai: sticker '+(i+1)+' / '+jobs.length+' (BOX '+jobs[i][0]+')';
+      await sendBytes(jobs[i][1],p=>{$('pbar').style.width=Math.round((i+p)/jobs.length*100)+'%'});
+      $('pbar').style.width=Math.round((i+1)/jobs.length*100)+'%';await sleep(500)}
+    $('pstat').textContent='Ho gaya! '+jobs.length+' sticker bheje.';toast('Print bheja: '+jobs.length+' sticker')}
+  catch(e){nConn='';const em='Error: '+(e.message||e)+(NATIVE?' (Printer on hai? Delay badhake dekho)':' (Printer settings me chunk 20 karke dekho)');$('pstat').textContent=em;toast(em)}}
+function list(){const r=range(),a=[];for(let b=r.a;b<=r.b;b++)for(let c=0;c<r.c;c++)a.push(b);return a}
+$('goBt').onclick=()=>runBT(list());
+$('test').onclick=()=>runBT([1]);
+$('goSys').onclick=()=>{const L=S.layout,boxes=list();
+  const imgs=boxes.map(b=>{const c=document.createElement('canvas');drawSticker(c,b);return c.toDataURL('image/png')});
+  const f=document.createElement('iframe');f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';document.body.appendChild(f);
+  f.srcdoc='<html><head><style>@page{size:'+L.wmm+'mm '+L.hmm+'mm;margin:0}html,body{margin:0;padding:0}img{display:block;width:'+L.wmm+'mm;height:'+L.hmm+'mm;page-break-after:always}</style></head><body>'+imgs.map(u=>'<img src="'+u+'">').join('')+'</body></html>';
+  f.onload=()=>{setTimeout(()=>{f.contentWindow.focus();f.contentWindow.print();setTimeout(()=>f.remove(),60000)},300)}};
+$('goPng').onclick=()=>{const c=document.createElement('canvas'),b=range().a;drawSticker(c,b);const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='sticker-'+S.data.bilty+'-box'+b+'.png';a.click()};
+$('addp').onclick=addPrinter;
+$('pdev').onchange=()=>{if(NATIVE){if($('pdev').value)selectNative($('pdev').value)}else{S.sel=$('pdev').value;persist();selectDev();renderPrinters()}};
+
+/* ---------- scan ---------- */
+let stream=null,tm=null;
+function showScan(raw){const p=raw.split('|'),o=$('scanOut');let h='<div class="kv"><b>Raw text</b><span>'+esc(raw)+'</span>';
+  if(p.length>=2){h+='<b>Bilty No</b><span>'+esc(p[0])+'</span>';
+    if(p.length>=3){const r=p[1].split('>');h+='<b>Kahan se</b><span>'+esc(r[0]||'')+'</span><b>Kahan tak</b><span>'+esc(r[1]||'')+'</span>'}
+    h+='<b>Box</b><span>'+esc(p[p.length-1])+'</span>'}
+  o.innerHTML=h+'</div>'}
+async function startScan(){
+  if(!('BarcodeDetector' in window)){$('scanOut').innerHTML='<div class="warn">Is browser me scanner nahi hai. Phone ka camera ya koi barcode app use karo.</div>';return}
+  try{const det=new BarcodeDetector({formats:['code_128']});stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=$('vid');v.srcObject=stream;v.style.display='block';await v.play();
+    tm=setInterval(async()=>{try{const r=await det.detect(v);if(r.length)showScan(r[0].rawValue)}catch(e){}},300)}
+  catch(e){$('scanOut').innerHTML='<div class="warn">Camera nahi khula: '+esc(e.message)+'</div>'}}
+function stopScan(){clearInterval(tm);if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}$('vid').style.display='none'}
+$('scan').onclick=startScan;$('scanStop').onclick=stopScan;
+$('scanImg').onchange=async e=>{if(!('BarcodeDetector' in window)){$('scanOut').innerHTML='<div class="warn">Is browser me scanner nahi hai.</div>';return}
+  try{const bmp=await createImageBitmap(e.target.files[0]),r=await new BarcodeDetector({formats:['code_128']}).detect(bmp);
+    if(r.length)showScan(r[0].rawValue);else $('scanOut').innerHTML='<div class="warn">Barcode nahi mila.</div>'}catch(x){$('scanOut').innerHTML='<div class="warn">'+esc(x.message)+'</div>'}};
+
+if(!NATIVE&&'serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+load();applyUI();bindForm();renderItems();redraw();renderPrinters();initExtra();refreshDevs();
+
+</script>
+</body>
+</html>
