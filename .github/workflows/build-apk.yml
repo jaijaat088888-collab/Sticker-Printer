@@ -29,6 +29,16 @@ jobs:
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
           echo "licenses done"
 
+      - name: Pakki signing key (isse har baar app usi ke upar update hoti hai)
+        run: |
+          if [ -f debug.keystore ]; then
+            mkdir -p ~/.android
+            cp debug.keystore ~/.android/debug.keystore
+            echo "stable key use ho rahi hai"
+          else
+            echo "debug.keystore repo me nahi hai (app purani ke upar update nahi hogi)"
+          fi
+
       - name: Build (error ho to Summary me dikhega)
         shell: bash
         run: |
