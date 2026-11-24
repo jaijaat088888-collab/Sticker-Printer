@@ -77,13 +77,16 @@ video{width:100%;border-radius:14px;background:#000;max-height:300px}
 pre{white-space:pre-wrap;font-size:12px;color:var(--mute);margin:0}
 #bkBox{display:none;margin-top:10px}#bkBox.on{display:block}
 .fl{padding:11px 16px;border:1px solid var(--stroke);border-radius:14px;font-weight:700;cursor:pointer;background:var(--glass-hi)}
-/* Smooth mode: no blur, no animation (purane / slow phones) */
-body.lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;animation:none!important;transition:none!important}
-body.lite .glass,body.lite .card{background:rgba(26,32,70,.94);box-shadow:none}
-body.light.lite .glass,body.light.lite .card{background:rgba(255,255,255,.92)}
-body.lite .sheet,body.lite #toast{background:rgba(22,28,62,.98)}
-body.light.lite .sheet,body.light.lite #toast{background:rgba(255,255,255,.98)}
+/* Smooth mode: blur aur shadow band (yehi lag ka main kaaran hai), cards halke-translucent rehte hain */
+body.lite *{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important}
+body.lite *:not(.tab):not(.ind):not(.sheet):not(#pm):not(#toast){animation:none!important;transition:none!important}
 body.lite #bg{display:none}
+body.lite .glass,body.lite .card{background:rgba(255,255,255,.1)}
+body.lite header,body.lite nav{background:rgba(16,22,56,.97)}
+body.lite .sheet,body.lite #toast{background:rgba(18,24,58,.98)}
+body.light.lite .glass,body.light.lite .card{background:rgba(255,255,255,.72)}
+body.light.lite header,body.light.lite nav{background:rgba(255,255,255,.97)}
+body.light.lite .sheet,body.light.lite #toast{background:rgba(255,255,255,.99)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -181,7 +184,7 @@ body.lite #bg{display:none}
   <div class="card"><h2>App ki setting</h2>
     <div class="grid">
       <label class="f">Theme<select id="theme"><option value="dark">Dark glass</option><option value="light">Light glass</option></select></label>
-      <label class="f">Smooth mode<span class="row" style="color:var(--ink);padding-top:9px"><input type="checkbox" id="lite"> Kam effects, tez chale</span></label>
+      <label class="f">Smooth mode<span class="row" style="color:var(--ink);padding-top:9px"><input type="checkbox" id="lite"> Blur band, tez chale (lag ho to tick karo)</span></label>
     </div>
     <p class="mute" style="margin:10px 0 0">Phone atak raha ho to Smooth mode chalu karo, blur aur animation band ho jaate hain.</p>
   </div>
@@ -421,7 +424,7 @@ async function ensureNative(){
   if(nConn===S.sel)return true;
   try{$('pstat').textContent='Printer se judh raha hai...';await BT.connect({address:S.sel});nConn=S.sel;renderPrinters();return true}
   catch(e){const em='Nahi juda: '+(e.message||e)+'. Printer on karke paas lao.';$('pstat').textContent=em;toast(em);return false}}
-function applyUI(){const u=S.ui;if(u.lite===null||u.lite===undefined)u.lite=!!(navigator.deviceMemory&&navigator.deviceMemory<=3);
+function applyUI(){const u=S.ui;if(u.lite===null||u.lite===undefined)u.lite=NATIVE?true:!!(navigator.deviceMemory&&navigator.deviceMemory<=3);
   document.body.classList.toggle('light',u.theme==='light');document.body.classList.toggle('lite',!!u.lite);
   const m=document.querySelector('meta[name=theme-color]');if(m)m.content=u.theme==='light'?'#e6efff':'#08122b'}
 function ind(){const k=[...document.querySelectorAll('nav button')].findIndex(b=>b.classList.contains('on'));document.querySelector('nav .ind').style.transform='translateX('+(Math.max(0,k)*100)+'%)'}
